@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <div class="main-inputs">
+        <input type="text" id="input-player-name" class="input" />
+        <button id="btn-join-waiting">Join match</button>
+      </div>
+
+      <article>
+        <ul id="waiting-players"></ul>
+      </article>
+      <article>
+        <h4>PLAYERS LIST</h4>
+        <ul id="players-list"></ul>
+      </article>
+      <article>
+        <h4>GAME TIMER</h4>
+        <div id="game-timer">Time remaining: 0 seconds</div>
+      </article>
+      <article>
+        <h4>QUESTION</h4>
+        <div id="question"></div>
+      </article>
+
+      <div id="game-board">
+        <div class="board-row">
+          <button class="board-cell" data-cell-id="0"></button>
+          <button class="board-cell" data-cell-id="1"></button>
+          <button class="board-cell" data-cell-id="2"></button>
+          <button class="board-cell" data-cell-id="3"></button>
+        </div>
+      </div>
+    </main>
+
+    <style>
+      .main-inputs {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      .board-cell {
+        border: 2px solid transparent;
+        position: relative;
+        min-height: 60px;
+        margin: 5px;
+        transition: all 0.3s ease;
+      }
+      .board-cell:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+      .player-color-box {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 10px;
+        border-radius: 50%;
+      }
+      .player-selection {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+      }
+      #players-list li {
+        display: flex;
+        align-items: center;
+        margin: 5px 0;
+      }
+      .board-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin: 10px 0;
+      }
+      .question-counter {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 10px;
+      }
+      .results-container {
+        text-align: center;
+        padding: 20px;
+      }
+      .results-list {
+        margin-top: 20px;
+      }
+      .result-item {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+        padding: 10px;
+        /* background: #f5f5f5; */
+        border-radius: 5px;
+      }
+      .player-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        margin-right: 10px;
+      }
+      .player-name {
+        flex: 1;
+        text-align: left;
+      }
+      .player-score {
+        font-weight: bold;
+        margin-left: 10px;
+      }
+    </style>
+    <script src="./script.js" type="module"></script>
+  </body>
+</html>
