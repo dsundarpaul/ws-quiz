@@ -1,7 +1,7 @@
 
-### This is a prototype for certifyYourself.
+# This is a prototype for certifyYourself.
 
-# To start dev server.
+### To start dev server.
 - git clone, and ```npm install``` in root folder
 - then cd web and  ```npm install``` again.
 - open two termials for frontend and backend.
