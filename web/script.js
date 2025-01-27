@@ -6,12 +6,7 @@ const inputPlayerName = document.getElementById("input-player-name");
 const ROOM = "WAITING-ROOM";
 
 const socket = io("http://localhost:3000");
-const userSocket = io("http://localhost:3000/user", { auth: { token: "" } });
-
-// socket.on("connect", () => {
-//   // window.alert(`You have connected with ${socket.id}`);
-//   updateJoinedPlayers(`You have connected with ${socket.id}`);
-// });
+// const userSocket = io("http://localhost:3000/user", { auth: { token: "" } });
 
 socket.on("emit-jonined-game", (message) => updateJoinedPlayers(message));
 
@@ -42,10 +37,6 @@ socket.on("emit-jonined-game", () => {
 socket.on("MATCH_ROOM", (playersList) => {
   displayPlayersList(playersList);
 });
-
-// Add at the top with other variables
-let currentQuestionNumber = 0;
-let totalQuestions = 0;
 
 socket.on("start-game", ({ room, players, question, currentQuestionNumber, totalQuestions }) => {
   console.log(`Game started in room: ${room}`);
@@ -83,7 +74,31 @@ socket.on("game-timer", (time) => {
 
 socket.on("game-over", () => {
   console.log("Game over");
-  window.alert("Game over!");
+  
+  // Clear game state
+  currentPlayers = [];
+  currentQuestionNumber = 0;
+  totalQuestions = 0;
+  optionsEnabled = true;
+
+  // Clear game board
+  const gameBoard = document.getElementById("game-board");
+  const questionElement = document.getElementById("question");
+  const timerElement = document.getElementById("game-timer");
+
+  // Reset timer
+  timerElement.textContent = "Time remaining: 0 seconds";
+
+  // Clear question
+  questionElement.innerHTML = '';
+
+  // Show game over message
+  gameBoard.innerHTML = `
+    <div class="game-over-message">
+      <h2>Game Over!</h2>
+      <button onclick="window.location.reload()">Play Again</button>
+    </div>
+  `;
 });
 
 const updateJoinedPlayers = (players) => {
@@ -206,6 +221,7 @@ const updateQuestionCounter = (current, total) => {
 const displayResults = (results) => {
   const gameBoard = document.getElementById("game-board");
   gameBoard.innerHTML = `
+  <div>
     <div class="results-container">
       <h2>Game Results</h2>
       <div class="results-list">
@@ -223,5 +239,10 @@ const displayResults = (results) => {
           .join('')}
       </div>
     </div>
+    <div class="game-over-message">
+      <h2>Game Over!</h2>
+      <button onclick="window.location.reload()">Play Again</button>
+    </div>  
+  </div>
   `;
 };

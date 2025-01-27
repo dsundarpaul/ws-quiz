@@ -23,6 +23,7 @@ let waitingPlayers = [];
 let activeGames = new Map(); // To store active game rooms and their players
 let playerSelections = new Map(); // To track which players have selected options
 let gameScores = new Map(); // To track scores for each game room
+
 const MAX_PLAYERS = 3;
 const QUESTIONS_PER_GAME = 5; // Number of questions per game
 
@@ -70,6 +71,21 @@ const createGameState = (gameRoom, players) => {
     }, {}),
     selections: new Map()
   };
+};
+
+// Add at the top with other cleanup functions
+const cleanupGameRoom = (gameRoom) => {
+  // Get all sockets in the room
+  const room = io.sockets.adapter.rooms.get(gameRoom);
+  if (room) {
+    // Remove each socket from the room
+    room.forEach(socketId => {
+      const socket = io.sockets.sockets.get(socketId);
+      if (socket) {
+        socket.leave(gameRoom);
+      }
+    });
+  }
 };
 
 io.on("connection", (socket) => {
@@ -185,21 +201,65 @@ io.on("connection", (socket) => {
   };
 
   const endGame = (gameRoom) => {
+    // Send final results before cleanup
+    const gameState = gameScores.get(gameRoom);
+    if (gameState) {
+      const results = {
+        scores: gameState.scores,
+        players: gameState.players
+      };
+      io.to(gameRoom).emit("game-complete", results);
+    }
+
+    // Clean up game state
     gameScores.delete(gameRoom);
     activeGames.delete(gameRoom);
+    
+    // Clean up room and notify players
+    cleanupGameRoom(gameRoom);
     io.to(gameRoom).emit("game-over");
   };
 
   const startGameTimer = (gameRoom) => {
     let gameTime = 60;
     const gameInterval = setInterval(() => {
+      // Check if game still exists
+      if (!gameScores.has(gameRoom)) {
+        clearInterval(gameInterval);
+        return;
+      }
+
       if (gameTime > 0) {
         gameTime--;
         io.to(gameRoom).emit("game-timer", gameTime);
       } else {
         clearInterval(gameInterval);
-        endGame(gameRoom); // Use the new endGame function
+        endGame(gameRoom);
       }
     }, 1000);
+
+    // Store interval ID in game state for cleanup
+    const gameState = gameScores.get(gameRoom);
+    if (gameState) {
+      gameState.timerInterval = gameInterval;
+    }
   };
+
+  socket.on("disconnect", () => {
+    // Find if player was in a game room
+    const gameRoom = Array.from(socket.rooms)
+      .find(room => room.startsWith('GAME_ROOM_'));
+    
+    if (gameRoom) {
+      const gameState = gameScores.get(gameRoom);
+      if (gameState) {
+        // End game if a player disconnects
+        endGame(gameRoom);
+      }
+    }
+
+    // Remove from waiting room if they were waiting
+    waitingPlayers = waitingPlayers.filter(p => p.socketId !== socket.id);
+    io.to("WAITING-ROOM").emit("joined-waiting-room", waitingPlayers);
+  });
 });
